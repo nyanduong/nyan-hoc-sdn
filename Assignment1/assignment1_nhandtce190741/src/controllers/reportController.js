@@ -37,7 +37,7 @@ exports.createReport = async (req, res) => {
 exports.updateReport = async (req, res) => {
     try {
         const report = await Report.findByIdAndUpdate(
-            req.params._id,
+            req.params.id,
             req.body,
             {
                 new: true,
@@ -57,7 +57,7 @@ exports.updateReport = async (req, res) => {
 
 exports.deleteReport = async (req, res) => {
     try {
-        const report = await Report.findByIdAndDelete(req.params._id);
+        const report = await Report.findByIdAndDelete(req.params.id);
         if (!report) {
             return res.status(404).json({
                 message: 'Report not found'
