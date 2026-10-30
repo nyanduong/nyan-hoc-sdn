@@ -25,7 +25,7 @@ Cần Node.js 22.12+ (khuyến nghị Node.js 24) và npm.
    npm run dev
    ```
 
-3. Truy cập URL Vite in ra, mặc định `http://127.0.0.1:5173`.
+3. Truy cập URL Vite in ra, mặc định `http://localhost:5173`.
 
 Vite proxy chuyển `/api` đến backend và bỏ tiền tố `/api`. Ví dụ `/api/users/signin` gọi `http://localhost:8002/users/signin`. Cấu hình này hoạt động với cả `npm run dev` và `npm run preview`, không cần sửa CORS trong backend.
 
