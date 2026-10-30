@@ -20,7 +20,8 @@ fs.mkdirSync(screenshots, { recursive: true });
   try {
     await mongoose.connect(process.env.MONGO_URI);
     browser = await chromium.launch({ channel: 'msedge', headless: true });
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage();
     page.on('pageerror', (err) => errors.push(err.message));
     await page.goto('http://127.0.0.1:5173/reports');
     await expect(page).toHaveURL(/signin/);

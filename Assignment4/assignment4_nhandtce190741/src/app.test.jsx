@@ -111,64 +111,110 @@ describe("Authentication and authorization", () => {
 describe("Reports integration", () => {
   it("removes old reports immediately and fetches again when another tab changes account", async () => {
     const tokenA = token();
-    const tokenB = `header.${btoa(JSON.stringify({ id: 'user-b', email: 'b@example.com', role: 'user', exp: Math.floor(Date.now() / 1000) + 3600 }))}.signature`;
+    const tokenB = `header.${btoa(JSON.stringify({ id: "user-b", email: "b@example.com", role: "user", exp: Math.floor(Date.now() / 1000) + 3600 }))}.signature`;
     localStorage.setItem(TOKEN_KEY, tokenA);
     let resolveB;
     const handler = vi.fn(async (config) => {
       if (config.headers.Authorization === `Bearer ${tokenB}`) {
         return new Promise((resolve) => {
-          resolveB = () => resolve({ data: [], status: 200, headers: {}, config });
+          resolveB = () =>
+            resolve({ data: [], status: 200, headers: {}, config });
         });
       }
-      return { data: [{ _id: 'a', title: 'Private report A', project: 'A', severity: 'low', status: 'open', assignedTo: { username: 'A' } }], status: 200, headers: {}, config };
+      return {
+        data: [
+          {
+            _id: "a",
+            title: "Private report A",
+            project: "A",
+            severity: "low",
+            status: "open",
+            assignedTo: { username: "A" },
+          },
+        ],
+        status: 200,
+        headers: {},
+        config,
+      };
     });
     api.defaults.adapter = handler;
-    mount('/reports');
-    await screen.findByText('Private report A');
+    mount("/reports");
+    await screen.findByText("Private report A");
     await act(async () => {
       localStorage.setItem(TOKEN_KEY, tokenB);
-      window.dispatchEvent(new StorageEvent('storage', { key: TOKEN_KEY, oldValue: tokenA, newValue: tokenB }));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: TOKEN_KEY,
+          oldValue: tokenA,
+          newValue: tokenB,
+        }),
+      );
     });
-    expect(screen.queryByText('Private report A')).toBeNull();
-    expect(screen.getByText('b@example.com')).toBeTruthy();
-    expect(screen.getByText('Loading your reports…')).toBeTruthy();
-    await waitFor(() => expect(resolveB).toBeTypeOf('function'));
+    expect(screen.queryByText("Private report A")).toBeNull();
+    expect(screen.getByText("b@example.com")).toBeTruthy();
+    expect(screen.getByText("Loading your reports…")).toBeTruthy();
+    await waitFor(() => expect(resolveB).toBeTypeOf("function"));
     await act(async () => resolveB());
-    expect(await screen.findByText('No reports are assigned to you.')).toBeTruthy();
+    expect(
+      await screen.findByText("No reports are assigned to you."),
+    ).toBeTruthy();
     expect(handler).toHaveBeenCalledTimes(2);
   });
 
   it("does not restore an old account's delayed response after an account switch", async () => {
     const tokenA = token();
-    const tokenB = `header.${btoa(JSON.stringify({ id: 'user-b', email: 'b@example.com', role: 'user', exp: Math.floor(Date.now() / 1000) + 3600 }))}.signature`;
+    const tokenB = `header.${btoa(JSON.stringify({ id: "user-b", email: "b@example.com", role: "user", exp: Math.floor(Date.now() / 1000) + 3600 }))}.signature`;
     localStorage.setItem(TOKEN_KEY, tokenA);
     let resolveA;
     api.defaults.adapter = vi.fn(async (config) => {
       if (config.headers.Authorization === `Bearer ${tokenA}`) {
         return new Promise((resolve) => {
-          resolveA = () => resolve({ data: [{ _id: 'a', title: 'Late private report A' }], status: 200, headers: {}, config });
+          resolveA = () =>
+            resolve({
+              data: [{ _id: "a", title: "Late private report A" }],
+              status: 200,
+              headers: {},
+              config,
+            });
         });
       }
       return { data: [], status: 200, headers: {}, config };
     });
-    mount('/reports');
-    await waitFor(() => expect(resolveA).toBeTypeOf('function'));
+    mount("/reports");
+    await waitFor(() => expect(resolveA).toBeTypeOf("function"));
     await act(async () => {
       localStorage.setItem(TOKEN_KEY, tokenB);
-      window.dispatchEvent(new StorageEvent('storage', { key: TOKEN_KEY, oldValue: tokenA, newValue: tokenB }));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: TOKEN_KEY,
+          oldValue: tokenA,
+          newValue: tokenB,
+        }),
+      );
     });
-    await screen.findByText('No reports are assigned to you.');
+    await screen.findByText("No reports are assigned to you.");
     await act(async () => resolveA());
-    expect(screen.queryByText('Late private report A')).toBeNull();
+    expect(screen.queryByText("Late private report A")).toBeNull();
   });
 
   it("ignores a late 401 belonging to the previous session", async () => {
     const oldToken = token();
-    const newToken = token('admin');
+    const newToken = token("admin");
     localStorage.setItem(TOKEN_KEY, newToken);
-    const config = { requiresAuth: true, headers: { Authorization: `Bearer ${oldToken}` } };
-    const error = new AxiosError('Expired old session', 'ERR_BAD_RESPONSE', config, null, { status: 401, config });
-    await expect(api.interceptors.response.handlers[0].rejected(error)).rejects.toBe(error);
+    const config = {
+      requiresAuth: true,
+      headers: { Authorization: `Bearer ${oldToken}` },
+    };
+    const error = new AxiosError(
+      "Expired old session",
+      "ERR_BAD_RESPONSE",
+      config,
+      null,
+      { status: 401, config },
+    );
+    await expect(
+      api.interceptors.response.handlers[0].rejected(error),
+    ).rejects.toBe(error);
     expect(localStorage.getItem(TOKEN_KEY)).toBe(newToken);
   });
 
@@ -207,13 +253,14 @@ describe("Reports integration", () => {
     expect(handler.mock.calls[0][0].headers.Authorization).toBe(
       `Bearer ${jwt}`,
     );
-
   });
   it("shows the empty state and logs out without leaving a token", async () => {
     localStorage.setItem(TOKEN_KEY, token());
     api.defaults.adapter = adapter([]);
     mount("/reports");
-    expect(await screen.findByText("No reports are assigned to you.")).toBeTruthy();
+    expect(
+      await screen.findByText("No reports are assigned to you."),
+    ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(
       await screen.findByRole("heading", { name: "Sign in" }),
@@ -232,7 +279,9 @@ describe("Reports integration", () => {
     ).toBeTruthy();
     api.defaults.adapter = adapter([]);
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(await screen.findByText("No reports are assigned to you.")).toBeTruthy();
+    expect(
+      await screen.findByText("No reports are assigned to you."),
+    ).toBeTruthy();
   });
   it("submits exactly the backend create contract without a client-set status", async () => {
     localStorage.setItem(TOKEN_KEY, token("admin"));

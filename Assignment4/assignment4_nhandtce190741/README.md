@@ -1,44 +1,79 @@
-# Assignment 4 — Bugdesk
+# Assignment 4 — Bug Report Management
 
-**Member code:** nhandtce190741  
-**Project name:** assignment4_nhandtce190741
+- Project: `assignment4_nhandtce190741`
+- Member code: `nhandtce190741`
+- Frontend: React + Vite, React Router DOM, Axios, Bootstrap.
+- Backend: dùng lại Assignment 3, URL mặc định `http://localhost:8002`. Không tạo backend mới hoặc sửa API.
 
-Frontend SPA for the Bug Report Management System. Uses the existing Assignment 3 backend without changing its API contracts or source code.
+## Cài đặt và chạy
 
-## Requirements
+Cần Node.js 22.12+ (khuyến nghị Node.js 24) và npm.
 
-- Node.js 22.12+ (Node.js 24 also supported), npm.
-- Existing Assignment 3 backend and its configured MongoDB database.
-- Existing `admin`, `moderator`, and `user` role documents in the Assignment 3 database, as required by that backend's registration controller.
-
-## Install and run
-
-1. Start the existing Assignment 3 backend in a separate terminal:
+1. Mở terminal tại backend `Assignment3/assignment3_nhandtce190741`:
 
    ```powershell
-   cd ..\..\Assignment3\assignment3_nhandtce190741
    npm install
    npm start
    ```
 
-   Its existing `.env` must configure `PORT=8002`, `MONGO_URI`, and `JWT_SECRET`. Keep real credentials in the backend; do not copy them into the frontend.
+   Backend dùng `.env` hiện có với `PORT=8002`, `MONGO_URI`, `JWT_SECRET`. MongoDB cần có các role `admin`, `moderator`, `user` theo Assignment 3.
 
-2. In this frontend folder:
+2. Mở terminal khác tại frontend `assignment4_nhandtce190741`:
 
    ```powershell
    npm install
    npm run dev
    ```
 
-3. Open the local URL printed by Vite, normally **http://127.0.0.1:5173**.
+3. Truy cập URL Vite in ra, mặc định `http://127.0.0.1:5173`.
 
-**Backend URL:** http://localhost:8002
+Vite proxy chuyển `/api` đến backend và bỏ tiền tố `/api`. Ví dụ `/api/users/signin` gọi `http://localhost:8002/users/signin`. Cấu hình này hoạt động với cả `npm run dev` và `npm run preview`, không cần sửa CORS trong backend.
 
-The browser calls `/api`; Vite forwards these requests to the existing backend and removes the `/api` prefix. For example `/api/users/signin` reaches `http://localhost:8002/users/signin`. This avoids cross-origin browser restrictions without modifying Assignment 3.
+Nếu backend dùng địa chỉ khác, copy `.env.example` thành `.env`, sửa `BACKEND_URL`, rồi khởi động lại Vite. Giữ `VITE_API_BASE_URL=/api` khi dùng proxy. Không đưa thông tin bí mật của backend vào frontend.
 
-Optional configuration: copy `.env.example` to `.env`. `BACKEND_URL` changes the proxy target. Keep `VITE_API_BASE_URL=/api` for local use. Restart Vite after changing environment variables. To use a direct backend URL in production, that server must support the frontend's origin through CORS.
+## Các chức năng theo đề
 
-## Build and verify
+| Trang             | Quyền truy cập | API                  |
+| ----------------- | -------------- | -------------------- |
+| `/signup`         | Chưa đăng nhập | `POST /users/signup` |
+| `/signin`         | Chưa đăng nhập | `POST /users/signin` |
+| `/reports`        | Đã đăng nhập   | `GET /reports`       |
+| `/reports/create` | Admin          | `POST /reports`      |
+
+- Đăng ký: username, email, password, role; kiểm tra dữ liệu cơ bản; thông báo thành công/lỗi.
+- Đăng nhập: email, password; lưu JWT trong localStorage; chuyển trang sau đăng nhập.
+- Đăng xuất: xóa token và trạng thái đăng nhập. Không thu hồi JWT trên server.
+- Báo cáo: hiển thị Title, Project, Severity, Status, Assigned To từ dữ liệu backend trả về cho tài khoản hiện tại. Có loading, lỗi và trạng thái không có dữ liệu.
+- Admin tạo báo cáo: title, description, severity (`low`, `medium`, `high`), project, assignedTo. Backend xác nhận người nhận tồn tại và có role `user`, tự đặt status `open`.
+- Người không phải Admin bị chặn bằng trang 403 khi truy cập trang tạo báo cáo.
+- Request được bảo vệ gửi `Authorization: Bearer <token>`. HTTP 401 xóa phiên và chuyển về đăng nhập.
+
+`assignedTo` được nhập dưới dạng ID MongoDB gồm 24 ký tự hexadecimal. Người nhận có thể đăng nhập để xem **My user ID** phía trên trang. Không giả định có API lấy danh sách người dùng vì đề không cung cấp API này.
+
+Admin tạo báo cáo giao cho User thì báo cáo xuất hiện ở tài khoản User, không xuất hiện ở danh sách của Admin. Đây là hành vi đúng của `GET /reports` trong Assignment 3.
+
+Giao diện sử dụng các lớp Bootstrap cơ bản; không có CSS riêng, trang trí, thống kê, tìm kiếm hoặc lọc. Các lớp container, grid, table-responsive giúp trang co giãn theo kích thước màn hình, không có giao diện mobile riêng.
+
+## Cấu trúc
+
+```text
+src/
+  api/client.js             Axios, Bearer JWT và xử lý lỗi
+  services/                 Hàm gọi API và đọc token
+  context/AuthContext.jsx   Trạng thái đăng nhập
+  routes/ProtectedRoute.jsx Bảo vệ route và quyền Admin
+  components/               Thanh điều hướng, thông báo
+  pages/                    Đăng ký/đăng nhập, báo cáo, tạo báo cáo, 403
+  App.jsx                   Khai báo route
+  main.jsx                  Entry React và import Bootstrap
+  app.test.jsx              Kiểm thử
+```
+
+Frontend chỉ đọc JWT payload để điều hướng và hiển thị. Backend vẫn xác minh chữ ký JWT và quyền truy cập.
+
+Khi tab khác thay đổi tài khoản, nội dung trang riêng tư được khởi tạo lại theo user ID, request cũ bị hủy và báo cáo được tải lại. Response cũ không được cập nhật lên trang; lỗi 401 của token cũ không xóa phiên mới.
+
+## Kiểm tra
 
 ```powershell
 npm test
@@ -46,76 +81,22 @@ npm run build
 npm run preview
 ```
 
-The preview server also proxies `/api` to Assignment 3. A production static host needs an equivalent reverse proxy for `/api`, plus a fallback to `index.html` for SPA routes. The `dist` folder contains the production build.
+Bộ test dùng dữ liệu kiểm soát qua Axios adapter, bao gồm phân quyền, 401, loading/empty/error, body tạo báo cáo và hồi quy đổi tài khoản giữa tab. Chạy demo thật vẫn cần backend và MongoDB.
 
-## Pages and API contracts
+Nếu đưa bản build lên static hosting, cần cấu hình chuyển `/api` đến backend và fallback về `index.html` cho các route SPA. Không cần triển khai hosting để làm bài local.
 
-| Route             | Access             | API                                                                    |
-| ----------------- | ------------------ | ---------------------------------------------------------------------- |
-| `/signup`         | Public             | `POST /users/signup` with username, email, password, role              |
-| `/signin`         | Public             | `POST /users/signin` with email, password                              |
-| `/reports`        | Signed-in accounts | `GET /reports`                                                         |
-| `/reports/create` | Admin only         | `POST /reports` with title, description, severity, project, assignedTo |
+## Demo và ảnh minh chứng
 
-- Roles: `admin`, `moderator`, `user`.
-- Severity: `low`, `medium`, `high` (matches the Assignment 3 model).
-- `GET /reports` returns an array of reports assigned to the authenticated account. The UI displays only this response; it never fetches a global report list.
-- Assignment 3 populates `assignedTo` with `_id`, `username`, `email`. The table displays the username.
-- The create form accepts an existing **User** account's MongoDB ID (24 hexadecimal characters). No unlisted users endpoint is assumed.
-- The backend sets the default status to `open`; the frontend does not submit a status.
-- Reports assigned to another user will appear in that user's reports page, not in the Admin creator's list. An empty Admin list is expected.
+1. Đăng ký một tài khoản User và một tài khoản Admin. Có thể dùng email trùng để minh họa lỗi backend.
+2. Đăng nhập User, ghi lại **My user ID**, sau đó đăng xuất.
+3. Đăng nhập Admin, tạo báo cáo giao cho ID trên; kiểm tra thông báo thành công và status `open`.
+4. Đăng nhập lại User, xem đủ năm cột báo cáo. Đăng nhập một User khác để minh họa báo cáo không được chia sẻ sang tài khoản khác.
+5. User/Moderator truy cập trực tiếp `/reports/create` để xem 403.
+6. Dùng DevTools giảm tốc mạng để xem loading; dừng backend và tải lại trang để xem lỗi; dùng tài khoản chưa được giao báo cáo để xem empty.
+7. Đăng xuất, truy cập `/reports` để xác nhận được chuyển về đăng nhập.
 
-## Authentication
+Thư mục `screenshots/` chứa ảnh của giao diện Bootstrap hiện tại, chụp với backend Assignment 3. Tài khoản và báo cáo QA dùng để kiểm tra đã được xóa sau khi chụp. Tạo tài khoản của bạn để demo. Nếu giảng viên có mẫu screenshot riêng, chụp lại theo mẫu đó.
 
-The JWT is stored under `bugdesk.token` in localStorage. The backend returns `{ message, token }`; the frontend reads `id`, `email`, `role`, and `exp` from the token payload for UI routing. Decoding does not verify the signature: Assignment 3 remains responsible for authentication and authorization.
+## Nộp bài
 
-Axios attaches `Authorization: Bearer <token>` to protected requests. Missing, invalid, or expired local tokens and protected HTTP 401 responses clear authentication and send the user to sign in. Expiry is also handled while the page is open, and storage changes synchronize login/logout across tabs. Sign out clears the token and state, but does not revoke a JWT on the backend.
-
-Non-Admin direct navigation to `/reports/create` shows 403 Forbidden. Backend Admin checks are still required and retained.
-
-## Project structure
-
-```text
-src/
-  api/client.js          Axios instance, auth interceptors, errors
-  services/             API functions and JWT/session helpers
-  context/              Shared authentication state
-  routes/               Authentication and Admin route guards
-  components/           Layout, inline icons, feedback
-  pages/                Sign in/up, reports, creation, forbidden
-  App.jsx               Routes and 404 handling
-  main.jsx              React entry, Bootstrap, global CSS
-  styles.css            Responsive visual design
-  app.test.jsx          Auth, permission, API and state tests
-```
-
-## Demo checklist
-
-1. Register a `user` account and an `admin` account on `/signup`. Show validation and successful registration. A duplicate email demonstrates a backend error.
-2. Sign in as the User. Expand **My account ID** in the sidebar and copy its ID. Sign out.
-3. Sign in as Admin. Open **Create report**, fill all fields, paste the User ID, and submit. Show success and the default Open status.
-4. Sign out and sign in as the User. Show the report's Title, Project, Severity, Status, and populated Assigned To username.
-5. Sign in as a different User to show that the report is not visible to that account.
-6. As a User or Moderator, open `/reports/create` directly. Show 403 Forbidden and the absence of Admin navigation.
-7. Show loading (DevTools network throttling), empty results, search/filter states, and errors (stop backend, then Refresh). An invalid JWT that has a readable payload demonstrates backend 401 handling.
-8. Test phone width and desktop width. Sign out and verify `/reports` returns to sign in.
-
-If the lecturer provides a screenshot template, capture the required screens from your running backend using that template. UI tests use controlled responses and do not replace a real-backend demonstration.
-
-## Verification and screenshots
-
-Verified with the existing Assignment 3 backend and its MongoDB database:
-
-- Registration, login, logout, Admin report creation and the default `open` status.
-- Populated assignee display and isolation between two User accounts.
-- Frontend 403 protection, backend 403 rejection and backend 401 session clearing.
-- Desktop (1440px) and mobile (390px) layouts; no uncaught browser errors.
-- Nine automated integration tests pass; production build succeeds.
-
-The `screenshots/` folder contains eight captures from this live verification: sign in, sign up, empty reports, report creation, creation success, populated reports, mobile layout and Forbidden. The temporary QA accounts and report shown in these screenshots were removed after verification. Use your own accounts for the classroom demonstration.
-
-## Submission
-
-Submit a ZIP named **assignment4_nhandtce190741.zip** containing this source folder, README, package lock, configuration and any required screenshots. **Exclude `node_modules`, `dist`, local `.env`, and test run artifacts.** The backend is reused from Assignment 3 and is not copied into this frontend.
-
-The interface uses Bootstrap with custom responsive styles and inline SVG icons. Google Fonts is optional; system font fallbacks keep the app usable offline. No frontend secrets or third-party API keys are required.
+File nộp: **assignment4_nhandtce190741.zip**. Bao gồm source, README, `package.json`, `package-lock.json`, cấu hình và ảnh minh chứng. Không đưa `node_modules`, `dist` hoặc `.env` thật vào ZIP. Backend được dùng từ Assignment 3, không sao chép vào frontend.
