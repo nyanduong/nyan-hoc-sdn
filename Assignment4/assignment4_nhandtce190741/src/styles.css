@@ -1,0 +1,110 @@
+body {
+  min-height: 100vh;
+  background: linear-gradient(115deg, #f3e8ce 0%, #edf0ee 48%, #dce9f4 100%);
+  color: #292929;
+}
+
+.app-header {
+  background: linear-gradient(100deg, #19344b, #274e70);
+  min-height: 62px;
+  padding: 10px 4%;
+}
+
+.app-header .navbar-brand {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  font-weight: 700;
+  white-space: normal;
+}
+
+.app-header .nav-link {
+  color: #e5edf3;
+}
+
+.app-header .nav-link.active,
+.app-header .nav-link:hover {
+  color: white;
+  font-weight: 700;
+}
+
+.auth-container {
+  padding: 52px 16px;
+}
+
+.auth-card,
+.content-card {
+  background: white;
+  border: 1px solid #e3e3e3;
+  border-radius: 16px;
+  box-shadow: 0 2px 5px #00000012;
+  padding: 24px;
+}
+
+.auth-card {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  color: #19344b;
+  font-weight: 700;
+}
+
+.auth-card h1 {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.auth-description {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.auth-card .mb-3 {
+  margin-bottom: 24px !important;
+}
+
+.form-control,
+.form-select {
+  min-height: 40px;
+  border-color: #e0e0e0;
+  border-radius: 6px;
+}
+
+.btn-primary {
+  background: linear-gradient(100deg, #d58000, #bd3d00);
+  border-color: #cd7100;
+  color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:disabled {
+  background: linear-gradient(100deg, #bd7100, #a63400);
+  border-color: #a65d00;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.auth-switch {
+  text-align: center;
+  color: #666;
+  margin: 26px 0 0;
+}
+
+@media (max-width: 576px) {
+  .app-header .navbar-brand {
+    font-size: 19px;
+  }
+  .auth-container {
+    padding-top: 28px;
+  }
+  .auth-card,
+  .content-card {
+    padding: 20px;
+  }
+}

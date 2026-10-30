@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { signin, signup } from "../services/api";
 import { errorMessage } from "../api/client";
 import Feedback from "../components/Feedback";
+import Header from "../components/Header";
 
 export default function AuthPage({ register = false }) {
   const { user, login, sessionMessage } = useAuth();
@@ -60,91 +61,101 @@ export default function AuthPage({ register = false }) {
   }
 
   return (
-    <main className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-12 col-md-7 col-lg-5">
-          <h1 className="h3 mb-4">{register ? "Sign up" : "Sign in"}</h1>
-          <Feedback>{error}</Feedback>
-          {!register && (
-            <Feedback type="success">{location.state?.success}</Feedback>
-          )}
-          {!register && <Feedback type="warning">{sessionMessage}</Feedback>}
-          <form onSubmit={submit}>
-            <fieldset disabled={pending}>
-              {register && (
+    <>
+      <Header />
+      <main className="auth-container">
+        <div className="auth-card">
+          <div>
+            <h1>{register ? "Register" : "Login"}</h1>
+            <p className="auth-description">
+              {register
+                ? "Create your Bug Report Management account."
+                : "Sign in to continue to your Bug Report Management."}
+            </p>
+            <Feedback>{error}</Feedback>
+            {!register && (
+              <Feedback type="success">{location.state?.success}</Feedback>
+            )}
+            {!register && <Feedback type="warning">{sessionMessage}</Feedback>}
+            <form onSubmit={submit}>
+              <fieldset disabled={pending}>
+                {register && (
+                  <div className="mb-3">
+                    <label htmlFor="username" className="form-label">
+                      Username
+                    </label>
+                    <input
+                      id="username"
+                      name="username"
+                      className="form-control"
+                      autoComplete="username"
+                      required
+                    />
+                  </div>
+                )}
                 <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Username
+                  <label htmlFor="email" className="form-label">
+                    Email
                   </label>
                   <input
-                    id="username"
-                    name="username"
+                    id="email"
+                    name="email"
+                    type="email"
                     className="form-control"
-                    autoComplete="username"
+                    autoComplete="email"
                     required
                   />
                 </div>
-              )}
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  className="form-control"
-                  autoComplete="email"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  className="form-control"
-                  autoComplete={register ? "new-password" : "current-password"}
-                  required
-                />
-              </div>
-              {register && (
                 <div className="mb-3">
-                  <label htmlFor="role" className="form-label">
-                    Role
+                  <label htmlFor="password" className="form-label">
+                    Password
                   </label>
-                  <select
-                    id="role"
-                    name="role"
-                    className="form-select"
-                    defaultValue="user"
-                  >
-                    <option value="user">User</option>
-                    <option value="moderator">Moderator</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    className="form-control"
+                    autoComplete={
+                      register ? "new-password" : "current-password"
+                    }
+                    required
+                  />
                 </div>
-              )}
-              <button className="btn btn-primary" type="submit">
-                {pending
-                  ? "Submitting…"
-                  : register
-                    ? "Create account"
-                    : "Sign in"}
-              </button>
-            </fieldset>
-          </form>
-          <p className="mt-3">
-            {register ? "Already have an account?" : "Need an account?"}{" "}
-            <Link to={register ? "/signin" : "/signup"}>
-              {register ? "Sign in" : "Sign up"}
-            </Link>
-          </p>
+                {register && (
+                  <div className="mb-3">
+                    <label htmlFor="role" className="form-label">
+                      Role
+                    </label>
+                    <select
+                      id="role"
+                      name="role"
+                      className="form-select"
+                      defaultValue="user"
+                    >
+                      <option value="user">User</option>
+                      <option value="moderator">Moderator</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                )}
+                <button className="btn btn-primary auth-submit" type="submit">
+                  {pending
+                    ? "Submitting…"
+                    : register
+                      ? "Create account"
+                      : "Sign in"}
+                </button>
+              </fieldset>
+            </form>
+            <p className="auth-switch">
+              {register ? "Already have an account?" : "New here?"}{" "}
+              <Link to={register ? "/signin" : "/signup"}>
+                {register ? "Sign in" : "Create account"}
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
