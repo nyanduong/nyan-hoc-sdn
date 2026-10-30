@@ -14,6 +14,5 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: { proxy },
     preview: { proxy },
-    test: { environment: "jsdom", restoreMocks: true },
   };
 });

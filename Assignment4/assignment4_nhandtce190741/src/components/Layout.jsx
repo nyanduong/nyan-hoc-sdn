@@ -44,7 +44,6 @@ export default function Layout() {
             My user ID: <code>{user.id}</code>
           </div>
         </div>
-        {/* Reset private page state immediately when another tab changes account. */}
         <Outlet key={user.id} />
       </main>
     </>

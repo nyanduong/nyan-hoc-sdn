@@ -24,7 +24,6 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // A response for an old account must not clear the new account's session.
     if (
       error.response?.status === 401 &&
       error.config?.requiresAuth &&

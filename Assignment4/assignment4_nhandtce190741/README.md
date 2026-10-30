@@ -66,7 +66,6 @@ src/
   pages/                    Đăng ký/đăng nhập, báo cáo, tạo báo cáo, 403
   App.jsx                   Khai báo route
   main.jsx                  Entry React và import Bootstrap
-  app.test.jsx              Kiểm thử
 ```
 
 Frontend chỉ đọc JWT payload để điều hướng và hiển thị. Backend vẫn xác minh chữ ký JWT và quyền truy cập.
@@ -76,12 +75,11 @@ Khi tab khác thay đổi tài khoản, nội dung trang riêng tư được kh�
 ## Kiểm tra
 
 ```powershell
-npm test
 npm run build
 npm run preview
 ```
 
-Bộ test dùng dữ liệu kiểm soát qua Axios adapter, bao gồm phân quyền, 401, loading/empty/error, body tạo báo cáo và hồi quy đổi tài khoản giữa tab. Chạy demo thật vẫn cần backend và MongoDB.
+Chạy demo cần backend và MongoDB.
 
 Nếu đưa bản build lên static hosting, cần cấu hình chuyển `/api` đến backend và fallback về `index.html` cho các route SPA. Không cần triển khai hosting để làm bài local.
 

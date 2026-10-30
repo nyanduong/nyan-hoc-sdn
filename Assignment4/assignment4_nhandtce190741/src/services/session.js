@@ -1,7 +1,6 @@
 export const TOKEN_KEY = "bugdesk.token";
 export const SESSION_EXPIRED = "bugdesk:session-expired";
 
-// The payload is used for presentation and routing only. The backend verifies JWTs.
 export function readIdentity(token) {
   try {
     const parts = token.split(".");
