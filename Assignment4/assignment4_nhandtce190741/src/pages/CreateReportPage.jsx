@@ -113,8 +113,7 @@ export default function CreateReportPage() {
                 required
               />
               <div id="assigned-help" className="form-text">
-                Enter the ID of an existing account with role user. Users can
-                find their ID after signing in.
+                Enter the ID of an existing account with role user.
               </div>
             </div>
             <button className="btn btn-primary me-2" type="submit">

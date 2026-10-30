@@ -8,14 +8,6 @@ export default function Layout() {
     <>
       <Header />
       <main className="container py-4">
-        <div className="small text-body-secondary mb-4 text-break">
-          <div>
-            Account: <span>{user.email}</span> ({user.role})
-          </div>
-          <div>
-            My user ID: <code>{user.id}</code>
-          </div>
-        </div>
         <div className="content-card">
           <Outlet key={user.id} />
         </div>
